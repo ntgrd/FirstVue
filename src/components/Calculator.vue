@@ -34,12 +34,16 @@
             this.result = this.operand1 * this.operand2
         },
         divide(){
+            if (this.operand2 == 0)
+                console.log('error');
             this.result = this.operand1 / this.operand2
         }, 
         pow(){
             this.result = Math.pow(this.operand1, this.operand2)  
         },    
         integerDiv(){
+            if (this.operand2 == 0)
+                console.log('error');
             this.result = Math.floor(this.operand1/this.operand2)  
         },   
     },
