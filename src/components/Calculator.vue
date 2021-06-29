@@ -1,53 +1,139 @@
 <template>
-<div>
-     <div class="display">
-       <input type='number' v-model.number.trim="operand1"/>
-       <input type='number' v-model.number.trim="operand2"/>
-       = {{result}}
-     </div>
+    <div>
+        <div class="display">
+            <input type='number' v-model.number.trim="operand1"/>
+            <input type='number' v-model.number.trim="operand2"/>
+            = {{result}}
+        </div>
 
-     <div class="keyboard">
-   <button v-on:click="result = operand1 + operand2">+</button>
-   <button v-on:click="result = operand1 - operand2">-</button>
-   <button @click="divide">/</button>
-   <button @click="mult">*</button>
-   <button @click="pow">pow</button>
-   <button @click="integerDiv">%</button>
- </div>
+        <div class="keyboard">
+            <button
+                v-for="operand in operands"
+                :key="operand"
+                :title="operand"
+                :disabled="operand1 === '' || operand2 === ''"
+                @click="calculate(operand)"
+                >
+                {{ operand }}
+            </button>
+        </div>
 
-  </div>
+             <input type="checkbox" id="checkbox" v-model="checked">
+             <label for="checkbox">Отобразить экранную клавиатуру</label>
+
+         <div class="screen_keyboard" v-show='checked'>
+            <button
+                v-for="key in keys"
+                :key="key"
+                :title="key"
+                @click="print(chosen, key)">
+                {{ key }}
+            </button>
+        </div>
+
+        <div class="logs">
+        <div v-for="(log, id) in logs" v-bind:key="id">{{ log }}</div>
+        </div>
+
+        <div v-show="error">Ошибка! {{ error }}</div>
+        
+        <div class="strange-message">
+            <template v-if="result < 0">Получилось отрицательное число</template>
+            <template v-else-if="result < 100">Результат в первой сотне</template>
+            <template v-else>Получилось слишком большое число</template>
+        </div>
+<div class="radio_btn">
+        <input type="radio" id="first" value="operand1" v-model="chosen" checked>
+        <label for="first">operand1</label>
+        <input type="radio" id="second" value="operand2" v-model="chosen">
+        <label for="second">operand2</label>
+</div>
+    </div>
 
 </template>
  
 <script>
  export default {
-   name: 'Calculator',
-   data(){
-       return {
-           operand1: 0,
-           operand2: 0,
-           result: 0
-       }
-   },
-   methods:{
-        mult(){
+    name: 'Calculator',
+        data(){
+            return {
+                operands: ['+', '-', '/', '*', 'pow', '%'],
+                operand1: 0,
+                operand2: 0,
+                result: 0,
+                error: '',
+                logs: {},
+                keys: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '<-'],
+                checked: '',
+                chosen: '',
+            }
+        },
+
+    methods: {
+        add () {
+            this.result = this.operand1 + this.operand2
+        },
+        substract () {
+            this.result = this.operand1 - this.operand2
+        },
+        divide () {
+            const { operand1, operand2 } = this
+            if (operand2 === 0) {
+                this.error = 'Делить на 0 нельзя!'
+            } else {
+                this.result = operand1 / operand2
+            }
+        },
+
+        multiply () {
             this.result = this.operand1 * this.operand2
         },
-        divide(){
-            if (this.operand2 == 0)
-                console.log('error');
-            this.result = this.operand1 / this.operand2
-        }, 
         pow(){
             this.result = Math.pow(this.operand1, this.operand2)  
         },    
         integerDiv(){
-            if (this.operand2 == 0)
-                console.log('error');
-            this.result = Math.floor(this.operand1/this.operand2)  
-        },   
-    },
-}
+            if (this.operand2 === 0){
+                this.error = 'Делить на 0 нельзя!'
+            } else {
+                this.result = Math.floor(this.operand1/this.operand2)  
+                }
+            },   
+        calculate (operation = '+') {
+            this.error = ''
+            switch (operation) {
+                case '+':
+                    this.add()
+                    break;
+                case '-':
+                    this.substract()
+                    break;
+                case '*':
+                    this.multiply()
+                    break;
+                case '/':
+                    this.divide()
+                    break;
+                case 'pow':
+                    this.pow()
+                    break;
+                case '%':
+                    this.integerDiv()
+                    break;
+            }
+            const key = Date.now()
+            const value = `${this.operand1}${operation}${this.operand2}=${this.result}`
+                this.$set(this.logs, key, value)
+
+        },
+        print(chosen, key) {
+            if (key === '<-') {
+                this.[chosen] = this.[chosen].substring(0, this.[chosen].length - 1)    
+            }
+            else {
+                this.[chosen] += key
+            }    
+    }
+}}
 </script>
 
 
